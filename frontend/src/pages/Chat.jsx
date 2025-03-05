@@ -1,11 +1,11 @@
-// src/pages/Chat.js
+// src/pages/Chat.jsx
 
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Header from '../components/Header';
 import Contact from '../components/Contact';
 import Message from '../components/Message';
 import MessageInput from '../components/MessageInput';
-import { getUsers, getMessages, sendMessage } from '../api/api';
 
 const Chat = () => {
     const [contacts, setContacts] = useState([]);
@@ -16,8 +16,14 @@ const Chat = () => {
     useEffect(() => {
         const fetchContacts = async () => {
             try {
-                const users = await getUsers(); // Obtener todos los usuarios
-                setContacts(users);
+                const response = await axios.get('http://127.0.0.1:8000/api/users/', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si usas JWT
+                        // O si usas autenticación de sesión, puedes necesitar el token CSRF
+                        // 'X-CSRFToken': csrfToken,
+                    },
+                });
+                setContacts(response.data);
             } catch (error) {
                 console.error('Error fetching users:', error);
             }
@@ -28,14 +34,13 @@ const Chat = () => {
 
     const handleSelectUser  = async (user) => {
         setSelectedUser (user);
-        const userMessages = await getMessages(user.username); // Obtener mensajes del usuario seleccionado
-        setMessages(userMessages);
+        // Aquí puedes agregar la lógica para obtener mensajes del usuario seleccionado
     };
 
     const handleSendMessage = async () => {
         if (newMessage && selectedUser ) {
-            await sendMessage(selectedUser .username, newMessage); // Enviar mensaje
-            setMessages([...messages, { content: newMessage }]); // Actualizar mensajes en el estado
+            // Lógica para enviar el mensaje
+            setMessages([...messages, { content: newMessage }]);
             setNewMessage('');
         }
     };
